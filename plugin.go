@@ -17,10 +17,10 @@ import (
 // GetGotifyPluginInfo returns gotify plugin info
 func GetGotifyPluginInfo() plugin.Info {
     return plugin.Info{
-    Version: "1.0",
-    Author: "Anh Bui",
+    Version: "1.1",
+    Author: "chacuavip10",
     Name: "Gotify 2 Telegram",
-    Description: "Telegram message fowarder for gotify",
+    Description: "Telegram message fowarder for gotify, with proxy support",
         ModulePath: "https://github.com/chacuavip10/gotify2telegram",
     }
 }
