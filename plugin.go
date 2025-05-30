@@ -20,7 +20,7 @@ func GetGotifyPluginInfo() plugin.Info {
     Author: "Anh Bui",
     Name: "Gotify 2 Telegram",
     Description: "Telegram message fowarder for gotify",
-        ModulePath: "https://github.com/anhbh310/gotify2telegram",
+        ModulePath: "https://github.com/chacuavip10/gotify2telegram",
     }
 }
 

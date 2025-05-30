@@ -6,15 +6,6 @@ This Gotify plugin forwards all received messages to Telegram through the Telegr
 - Golang, Docker, wget (If you want to build the binary from source).
 
 ## Installation
-* **By shared object**
-
-    1. Get the compatible shared object from [release](https://github.com/anhbh310/gotify2telegram/releases).
-
-    2. Put it into Gotify plugin folder.
-
-    3. Set secrets via environment variables (List of mandatory secrets is in [Appendix](#appendix)).
-
-    4. Restart gotify.
 
 * **Build from source**
 
@@ -26,7 +17,11 @@ This Gotify plugin forwards all received messages to Telegram through the Telegr
     make build
     ```
 
-    3. Follow instructions from step 2 in the shared object installation.
+    3. Put it into Gotify plugin folder.
+
+    4. Set secrets via environment variables (List of mandatory secrets is in [Appendix](#appendix)).
+
+    5. Restart gotify.
 
 ## Troubleshooting
 1. When only the Gotify dashboard receives your message, but not Telegram:
