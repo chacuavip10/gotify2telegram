@@ -1,17 +1,16 @@
 package main
 
 import (
-    "bytes"
-    "encoding/json"
-    "io"
-    "log"
-    "net/http"
-    "net/http/httputil"
-    "os"
-    "time"
+	"bytes"
+	"encoding/json"
+	"log"
+	"net/http"
+	"net/url"
+	"os"
+	"time"
 
-    "github.com/gotify/plugin-api"
-    "github.com/gorilla/websocket"
+	"github.com/gorilla/websocket"
+	"github.com/gotify/plugin-api"
 )
 
 // GetGotifyPluginInfo returns gotify plugin info
@@ -30,8 +29,9 @@ type Plugin struct {
     ws *websocket.Conn;
     msgHandler plugin.MessageHandler;
     debugLogger *log.Logger;
-    chatid string;
+    telegram_chatid string;
     telegram_bot_token string;
+    telegram_proxy_url string;
     gotify_host string;
 }
 
@@ -47,23 +47,28 @@ type GotifyMessage struct {
 type Payload struct {
     ChatID string `json:"chat_id"`
     Text   string `json:"text"`
+    Parse_mode  string `json:"parse_mode"`
 }
 
 func (p *Plugin) send_msg_to_telegram(msg string) {
     step_size := 4090
     sending_message := ""
-
+    parse_mode_tele := "HTML"
+    if len(msg) > 600 {
+        parse_mode_tele = "Markdown"
+    }
     for i:=0; i<len(msg); i+=step_size {
         if i+step_size < len(msg) {
 			sending_message = msg[i : i+step_size]
 		} else {
-			sending_message = msg[i:len(msg)]
+			sending_message = msg[i:]
 		}
 
         data := Payload{
         // Fill struct
-            ChatID: p.chatid,
+            ChatID: p.telegram_chatid,
             Text: sending_message,
+            Parse_mode: parse_mode_tele,
         }
         payloadBytes, err := json.Marshal(data)
         if err != nil {
@@ -71,17 +76,18 @@ func (p *Plugin) send_msg_to_telegram(msg string) {
             return
         }
         body := bytes.NewBuffer(payloadBytes)
-        // For future debugging
-        backup_body := bytes.NewBuffer(body.Bytes())
 
-        req, err := http.NewRequest("POST", "https://api.telegram.org/bot"+ p.telegram_bot_token +"/sendMessage", body)
-        if err != nil {
-            p.debugLogger.Println("Create request false")
-            return
+        client := &http.Client{}
+        if p.telegram_proxy_url != "" {
+            proxy, err := url.Parse(p.telegram_proxy_url)
+            if err != nil {
+                return
+            }
+            client.Transport = &http.Transport{
+                Proxy: http.ProxyURL(proxy),
+            }
         }
-        req.Header.Set("Content-Type", "application/json")
-
-        resp, err := http.DefaultClient.Do(req)
+        resp, err := client.Post("https://api.telegram.org/bot"+ p.telegram_bot_token +"/sendMessage", "application/json", body)
 
         if err != nil {
             p.debugLogger.Printf("Send request false: %v\n", err)
@@ -93,18 +99,7 @@ func (p *Plugin) send_msg_to_telegram(msg string) {
             p.debugLogger.Println("The message was forwarded successfully to Telegram")
         } else {
             // Log infor for debugging
-            p.debugLogger.Println("============== Request ==============")
-            pretty_print, err := httputil.DumpRequest(req, true)
-            if err != nil {
-                p.debugLogger.Printf("%v\n", err)
-            }
-            p.debugLogger.Printf(string(pretty_print))
-            p.debugLogger.Printf("%v\n", backup_body)
-
-            p.debugLogger.Println("============== Response ==============")
-            bodyBytes, err := io.ReadAll(resp.Body)
-            p.debugLogger.Printf("%v\n", string(bodyBytes))
-
+            p.debugLogger.Println("The message was failed to forwarded to Telegram")
         }
 
         defer resp.Body.Close()
@@ -126,10 +121,12 @@ func (p *Plugin) connect_websocket() {
 
 func (p *Plugin) get_websocket_msg(url string, token string) {
     p.gotify_host = url + "/stream?token=" + token
-    p.chatid = os.Getenv("TELEGRAM_CHAT_ID")
-    p.debugLogger.Printf("chatid: %v\n", p.chatid)
+    p.telegram_chatid = os.Getenv("TELEGRAM_CHAT_ID")
+    p.debugLogger.Printf("chatid: %v\n", p.telegram_chatid)
     p.telegram_bot_token = os.Getenv("TELEGRAM_BOT_TOKEN")
     p.debugLogger.Printf("Bot token: %v\n", p.telegram_bot_token)
+    p.telegram_proxy_url = os.Getenv("TELEGRAM_PROXY_URL")
+    p.debugLogger.Printf("Proxy URL: %v\n", p.telegram_proxy_url)
 
     go p.connect_websocket()
 
