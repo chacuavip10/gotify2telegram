@@ -56,10 +56,6 @@ func (p *Plugin) send_msg_to_telegram(msg string) {
     sending_message := ""
     parse_mode_tele := "HTML"
     if strings.HasPrefix(msg, "'''") {parse_mode_tele = "Markdown"}
-
-    // if len(msg) > 600 {
-    //     parse_mode_tele = "Markdown"
-    // }
     for i:=0; i<len(msg); i+=step_size {
         if i+step_size < len(msg) {
 			sending_message = msg[i : i+step_size]
@@ -147,7 +143,7 @@ func (p *Plugin) get_websocket_msg(url string, token string) {
             p.connect_websocket()
             continue
         }
-        p.send_msg_to_telegram(msg.Date + "\n" + msg.Title + "\n\n" + msg.Message)
+        p.send_msg_to_telegram(msg.Message)
     }
 }
 
