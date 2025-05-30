@@ -86,7 +86,9 @@ func (p *Plugin) send_msg_to_telegram(msg string) {
             client.Transport = &http.Transport{
                 Proxy: http.ProxyURL(proxy),
             }
-        }
+        } else {
+            p.debugLogger.Println("Proxy URL is empty, using default transport")
+            client.Transport = http.DefaultTransport}
         resp, err := client.Post("https://api.telegram.org/bot"+ p.telegram_bot_token +"/sendMessage", "application/json", body)
 
         if err != nil {
