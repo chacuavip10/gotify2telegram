@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -54,9 +55,11 @@ func (p *Plugin) send_msg_to_telegram(msg string) {
     step_size := 4090
     sending_message := ""
     parse_mode_tele := "HTML"
-    if len(msg) > 600 {
-        parse_mode_tele = "Markdown"
-    }
+    if strings.HasPrefix(msg, "'''") {parse_mode_tele = "Markdown"}
+
+    // if len(msg) > 600 {
+    //     parse_mode_tele = "Markdown"
+    // }
     for i:=0; i<len(msg); i+=step_size {
         if i+step_size < len(msg) {
 			sending_message = msg[i : i+step_size]
