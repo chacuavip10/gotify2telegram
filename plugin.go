@@ -114,7 +114,7 @@ func (p *Plugin) connect_websocket() {
             break
         }
         p.debugLogger.Printf("Cannot connect to websocket: %v\n", err)
-        time.Sleep(5)
+        time.Sleep(time.Second) // Retry after 500ms
     }
     p.debugLogger.Println("WebSocket connected successfully, ready for forwarding")
 }
@@ -133,7 +133,7 @@ func (p *Plugin) get_websocket_msg(url string, token string) {
     for {
         msg := &GotifyMessage{}
         if p.ws == nil {
-            time.Sleep(3)
+            time.Sleep(time.Second) // Wait for the connection to be established
             continue
         }
         err := p.ws.ReadJSON(msg)
