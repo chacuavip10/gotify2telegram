@@ -143,7 +143,7 @@ func (p *Plugin) get_websocket_msg(url string, token string) {
             p.connect_websocket()
             continue
         }
-        if strings.Contains(msg.Title, "bazarr") {
+        if strings.Contains(msg.Title, "bazarr") || strings.Contains(msg.Title, "qbit") {
             p.send_msg_to_telegram(msg.Message)
         } else {
             p.send_msg_to_telegram("<strong>" + msg.Title + "</strong>" + "\n" + msg.Message)
