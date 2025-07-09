@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -142,7 +143,11 @@ func (p *Plugin) get_websocket_msg(url string, token string) {
             p.connect_websocket()
             continue
         }
-        p.send_msg_to_telegram(msg.Message)
+        if strings.Contains(msg.Title, "bazarr") {
+            p.send_msg_to_telegram(msg.Message)
+        } else {
+            p.send_msg_to_telegram("<strong>" + msg.Title + "</strong>" + "\n" + msg.Message)
+             }
     }
 }
 
