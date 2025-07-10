@@ -80,7 +80,8 @@ func (p *Plugin) send_msg_to_telegram(msg string) {
         if p.telegram_proxy_url != "" {
             proxy, err := url.Parse(p.telegram_proxy_url)
             if err != nil {
-                return
+                p.debugLogger.Println("Error in parsing proxy url. Fallback to no proxy!")
+                client.Transport = http.DefaultTransport
             }
             client.Transport = &http.Transport{
                 Proxy: http.ProxyURL(proxy),
